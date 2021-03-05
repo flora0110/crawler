@@ -23,6 +23,9 @@ data=response.read().decode("utf-8")#將回傳的內容解碼
 #解析原始碼，取得每篇文章的標題
 import bs4
 root=bs4.BeautifulSoup(data,"html.parser")
+#這裡的root就是解析完成後，所產生的結構樹物件，接下來所有資料的搜尋、萃取等操作都會透過這個物件來進行。
+#html.parser 為python內建的解析器，lxml為解析速度最快的
+
 #print(root.title.string)
 titles=root.find_all("div",class_="title")#尋找所有class="title"的div標籤
 for title in titles:
