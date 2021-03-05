@@ -81,26 +81,58 @@ def crawl_text(url):
     #內文的底是--
     pre_text = all_text.split('※')
     pre_text = all_text.split('※')[0]
-    post_text = all_text.split('※')[1]
+    """
+    post_text = all_text.split('※')[2]
+    print("_________________pre:")
+    print(pre_text)
+    print("_________________post:")
+    print(post_text)
+    print("______________________")
+    """
     #把文字用'\n'切開
     texts=pre_text.split('\n')
+    """
     com_texts = post_text.split('\n')
+    """
     #拿掉第一行:標題
     contents = texts[1:]
-    comments = com_texts[3:]
+    #comments = com_texts[3:]
     #將元素用指定字符連接成新字串
     content = '\n'.join(contents)
-    comment = '\n'.join(comments)
+    #comment = '\n'.join(comments)
     print(content)
-    print("comment!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    """print("---comment:----------------------")
     print(comment)
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    print("------------------------------------------")"""
+    """
+    coms = root.find_all("span",class_="f3 push-content")
+    users = root.find_all("span",class_="f3 h1 push-userid")
+    tags = root.find_all("span",class_ ="f1 h1 push-tag" )
+    print("---comment:----------------------")
+    n=0
+    for com in coms:
+        print(users[n])
+        n=n+1
+        print(com.string)
+    """
+    pushs=root.find_all("div",class_="push")
+    #print("---comment:----------------------")
+    for push in pushs:
+        user = push.find("span",class_="f3 hl push-userid")
+        tag = push.find("span",class_="hl push-tag")
+        com = push.find("span",class_="f3 push-content")
+        #print(user.string)
+        #print(push)
+        print(tag.string)
+        print(user.string)
+        print(com.string)
+
 
 
 url="https://www.ptt.cc/bbs/Gossiping/index.html"
 f = open('gossipingcrawler_test.txt', 'w')
 n=0
-while n<3:
+while n<1:
     url = "http://www.ptt.cc"+ crawl(url)
     n+=1
 f.close()
