@@ -1,6 +1,7 @@
 # 抓取ptt八卦版的網頁原始碼(html)
 import urllib.request as req
 import bs4
+import json
 
 def crawl(url):
     #建立一個Request物件，附加request haders 的資訊
@@ -72,6 +73,16 @@ def crawl_text(url):
     time = header[3].text
     print("time:")
     print(time)
+    #json
+    d=[{"author":author,"board":board,
+                              "title":title,"time":time}]
+    json_data = json.dumps(d, sort_keys=True, indent=4, separators=(',', ': '))
+    with open('casedate.json', 'w', encoding='utf-8') as f:
+        f.write(json_data)
+
+    #store(json_data)
+    print(json_data)
+
 
     #抓出內容
     main_container=root.find("div",id="main-content")
@@ -81,54 +92,19 @@ def crawl_text(url):
     #內文的底是--
     pre_text = all_text.split('※')
     pre_text = all_text.split('※')[0]
-    """
-    post_text = all_text.split('※')[2]
-    print("_________________pre:")
-    print(pre_text)
-    print("_________________post:")
-    print(post_text)
-    print("______________________")
-    """
     #把文字用'\n'切開
     texts=pre_text.split('\n')
-    """
-    com_texts = post_text.split('\n')
-    """
     #拿掉第一行:標題
     contents = texts[1:]
-    #comments = com_texts[3:]
     #將元素用指定字符連接成新字串
     content = '\n'.join(contents)
-    #comment = '\n'.join(comments)
-    print(content)
-    """print("---comment:----------------------")
-    print(comment)
-    print("------------------------------------------")"""
-    """
-    coms = root.find_all("span",class_="f3 push-content")
-    users = root.find_all("span",class_="f3 h1 push-userid")
-    tags = root.find_all("span",class_ ="f1 h1 push-tag" )
-    print("---comment:----------------------")
-    n=0
-    for com in coms:
-        print(users[n])
-        n=n+1
-        print(com.string)
-    """
+    #print(content)
     pushs=root.find_all("div",class_="push")
-    #print("---comment:----------------------")
     for push in pushs:
         user = push.find("span",class_="f3 hl push-userid")
         com = push.find("span",class_="f3 push-content")
-        #print(user.string)
-        #print(push)
-        """
-        tag = push.find("span",class_="f3 hl push-tag")
         tag = push.find("span", {'class': 'push-tag'}).text
-        print(tag.string)
-        不知道為甚麼不能用
         """
-        tag = push.find("span", {'class': 'push-tag'}).text
         print(tag)
         #print(push.span.string)
         print(user.string)
@@ -136,8 +112,13 @@ def crawl_text(url):
             print(com.a["href"])
         else:
             print(com.string)
+        """
 
 
+
+#def store(data):
+#    with open(FILENAME, 'a') as f:
+#        f.write(data)
 
 url="https://www.ptt.cc/bbs/Gossiping/index.html"
 f = open('gossipingcrawler_test.txt', 'w')
