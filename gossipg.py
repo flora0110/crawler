@@ -119,13 +119,23 @@ def crawl_text(url):
     #print("---comment:----------------------")
     for push in pushs:
         user = push.find("span",class_="f3 hl push-userid")
-        tag = push.find("span",class_="hl push-tag")
         com = push.find("span",class_="f3 push-content")
         #print(user.string)
         #print(push)
+        """
+        tag = push.find("span",class_="f3 hl push-tag")
+        tag = push.find("span", {'class': 'push-tag'}).text
         print(tag.string)
+        不知道為甚麼不能用
+        """
+        tag = push.find("span", {'class': 'push-tag'}).text
+        print(tag)
+        #print(push.span.string)
         print(user.string)
-        print(com.string)
+        if com.a != None:
+            print(com.a["href"])
+        else:
+            print(com.string)
 
 
 
