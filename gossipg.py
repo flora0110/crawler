@@ -73,15 +73,10 @@ def crawl_text(url):
     time = header[3].text
     print("time:")
     print(time)
-    #json
-    d=[{"author":author,"board":board,
-                              "title":title,"time":time}]
-    json_data = json.dumps(d, sort_keys=True, indent=4, separators=(',', ': '))
-    with open('casedate.json', 'w', encoding='utf-8') as f:
-        f.write(json_data)
+        #f.write(json_data)
 
     #store(json_data)
-    print(json_data)
+    #print(json_data)
 
 
     #抓出內容
@@ -98,13 +93,22 @@ def crawl_text(url):
     contents = texts[1:]
     #將元素用指定字符連接成新字串
     content = '\n'.join(contents)
-    #print(content)
+    print(content)
+    #json
+    d=[{"author":author,"board":board,
+                              "title":title,"time":time,"content":content}]
+    #json_data = json.dumps(d, sort_keys=True, indent=4, separators=(',', ': '))
+    with open('casedate.json', 'a', encoding='utf-8') as f:
+        json.dump(d,f,ensure_ascii=False,sort_keys=True, indent=4);
+        print("---------------------------------------------------------------------------writing in json")
+
+    #data = [{"content":content}]
+    #json.dump(data,f,ensure_ascii=False,sort_keys=True, indent=4);
     pushs=root.find_all("div",class_="push")
     for push in pushs:
         user = push.find("span",class_="f3 hl push-userid")
         com = push.find("span",class_="f3 push-content")
         tag = push.find("span", {'class': 'push-tag'}).text
-        """
         print(tag)
         #print(push.span.string)
         print(user.string)
@@ -112,7 +116,6 @@ def crawl_text(url):
             print(com.a["href"])
         else:
             print(com.string)
-        """
 
 
 
