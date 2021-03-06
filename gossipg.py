@@ -2,7 +2,11 @@
 import urllib.request as req
 import bs4
 import json
-
+def addtwodimdict(thedict, key_a, key_b, val):
+  if key_a in thedict:
+    thedict[key_a].update({key_b: val})
+  else:
+    thedict.update({key_a:{key_b: val}})
 def crawl(url):
     #建立一個Request物件，附加request haders 的資訊
     #模擬request
@@ -62,17 +66,17 @@ def crawl_text(url):
     header = root.find_all('span','article-meta-value')
 
     author = header[0].text
-    print("author:")
-    print(author)
+    #print("author:")
+    #print(author)
     board = header[1].text
-    print("board:")
-    print(board)
+    #print("board:")
+    #print(board)
     title = header[2].text
-    print("title:")
-    print(title)
+    #print("title:")
+    #print(title)
     time = header[3].text
-    print("time:")
-    print(time)
+    #print("time:")
+    #print(time)
         #f.write(json_data)
 
     #store(json_data)
@@ -93,29 +97,50 @@ def crawl_text(url):
     contents = texts[1:]
     #將元素用指定字符連接成新字串
     content = '\n'.join(contents)
-    print(content)
+    #print(content)
     #json
-    d=[{"author":author,"board":board,
-                              "title":title,"time":time,"content":content}]
+
     #json_data = json.dumps(d, sort_keys=True, indent=4, separators=(',', ': '))
     with open('casedate.json', 'a', encoding='utf-8') as f:
-        json.dump(d,f,ensure_ascii=False,sort_keys=True, indent=4);
-        print("---------------------------------------------------------------------------writing in json")
 
-    #data = [{"content":content}]
-    #json.dump(data,f,ensure_ascii=False,sort_keys=True, indent=4);
-    pushs=root.find_all("div",class_="push")
-    for push in pushs:
-        user = push.find("span",class_="f3 hl push-userid")
-        com = push.find("span",class_="f3 push-content")
-        tag = push.find("span", {'class': 'push-tag'}).text
-        print(tag)
-        #print(push.span.string)
-        print(user.string)
-        if com.a != None:
-            print(com.a["href"])
-        else:
-            print(com.string)
+        com_dict = dict()
+        #data = [{"content":content}]
+        #json.dump(data,f,ensure_ascii=False,sort_keys=True, indent=4);
+        pushs=root.find_all("div",class_="push")
+        n=0
+        for push in pushs:
+            user = push.find("span",class_="f3 hl push-userid")
+            com = push.find("span",class_="f3 push-content")
+            tag = push.find("span", {'class': 'push-tag'}).text
+            #d=[{"user":user.string,"tag":tag,
+            #                          "comment":com.string}]
+            #json.dump(d,f,ensure_ascii=False,sort_keys=True, indent=4);
+            str(n)
+            addtwodimdict(com_dict,n,"user", user.string)
+            addtwodimdict(com_dict,n,"tag", tag)
+            """
+            print("------------------------dict test--------------------------------------")
+            print(com_dict[n]["user"])
+            print(com_dict[n]["tag"])
+            print("-----------------------------------------------------------------------")
+            """
+            int(n)
+            n=n+1
+            #print(tag)
+            #print(push.span.string)
+            #print(user.string)
+            if com.a != None:
+                #print(com.a["href"])
+                com=com.a["href"]
+            else:
+                #print(com.string)
+                com=com.string
+            addtwodimdict(com_dict,n,"com", com)
+        d=[{"author":author,"board":board,
+                                  "title":title,"time":time,"content":content},com_dict]
+        json.dump(d,f,ensure_ascii=False,sort_keys=True, indent=4);
+
+        print("---------------------------------------------------------------------------writing in json")
 
 
 
