@@ -2,6 +2,7 @@
 import urllib.request as req
 import bs4
 import json
+import collections
 
 #二維dict
 def addtwodimdict(thedict, key_a, key_b, val):
@@ -9,8 +10,12 @@ def addtwodimdict(thedict, key_a, key_b, val):
     if key_a in thedict:
         #update()把字典的键值對更新到dict
         thedict[key_a].update({key_b: val})
+        #thedict = {key_a:{key_b:val}}
     else:
         thedict.update({key_a:{key_b: val}})
+        #thedict{key_a} = {}
+        #thedict = {key_a:{key_b:val}}
+
 
 #進入某頁並回傳下頁url
 def crawl(url):
@@ -84,15 +89,17 @@ def crawl_text(url):
     content = '\n'.join(contents)
 
     #打開file(f)
-    with open('casedate.json', 'a', encoding='utf-8') as f:#用utf-8解碼中文
-        com_dict = dict()#回應dict
+    with open('gossip_crawl.json', 'a', encoding='utf-8') as f:#用utf-8解碼中文
+        #com_dict = collections.OrderedDict()#回應dict
+        com_dicts = collections.defaultdict()
         pushs=root.find_all("div",class_="push")#抓取推文
         n=1#推文數
         for push in pushs:
 
+            tag = push.find("span", {'class': 'push-tag'}).text
             user = push.find("span",class_="f3 hl push-userid")
             com = push.find("span",class_="f3 push-content")
-            tag = push.find("span", {'class': 'push-tag'}).text
+            com_time=push.find("span",class_="push-ipdatetime")
 
             #圖片要印網址
             if com.a != None:
@@ -103,15 +110,37 @@ def crawl_text(url):
 
             str(n)#int to string
             #把推文資料存進com_dict
+
+            com_dict = collections.defaultdict()
+            """
             addtwodimdict(com_dict,n,"user", user.string)
             addtwodimdict(com_dict,n,"tag", tag)
             addtwodimdict(com_dict,n,"com", com)
+            """
+            #com_dict = collections.defaultdict
+            com_dict['tag']=(tag)
+            com_dict['user']=(user.string)
+            com_dict['com']=(com)
+            com_dict['time']=(com_time.string)
+            #print(com_dict)
+            com_dicts[n]=com_dict
             int(n)#string to int
             n=n+1
 
-        d=[{"author":author,"board":board,"title":title,"time":time,"content":content},com_dict]
-        json.dump(d,f,ensure_ascii=False,sort_keys=True, indent=4);
-
+        dic = collections.OrderedDict()
+        dic['title']=title
+        dic['time']=time
+        dic['author']=author
+        dic['content']=content
+        dic['comment']=com_dicts
+        d=dict(dic)
+        #d=[{"author":author,"board":board,"title":title,"time":time,"content":content,"comment":com_dict}]
+        json.dump(d,f,ensure_ascii=False,sort_keys=False, indent=4);
+        """
+        sort_keys : 這個應該字面上很好理解了，是否排序Key。
+        indent : 若給非負整數，會幫你格式編排好看依照（填入的）數字等級。
+        """
+        print("writing...")
 url="https://www.ptt.cc/bbs/Gossiping/index.html"
 f = open('gossipingcrawler_test.txt', 'w')
 n=0
