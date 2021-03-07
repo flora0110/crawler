@@ -4,19 +4,6 @@ import bs4
 import json
 import collections
 
-#二維dict
-def addtwodimdict(thedict, key_a, key_b, val):
-    #檢查key_a是否存在
-    if key_a in thedict:
-        #update()把字典的键值對更新到dict
-        thedict[key_a].update({key_b: val})
-        #thedict = {key_a:{key_b:val}}
-    else:
-        thedict.update({key_a:{key_b: val}})
-        #thedict{key_a} = {}
-        #thedict = {key_a:{key_b:val}}
-
-
 #進入某頁並回傳下頁url
 def crawl(url):
     #建立一個Request物件，附加request haders 的資訊
@@ -45,8 +32,6 @@ def crawl(url):
     titles=root.find_all("div",class_="title")#尋找所有class="title"的div標籤
     for title in titles:
         if title.a != None:#如果標題包含 a標籤(沒有被刪除)
-            #print(title.a.string)
-            #print(title.a["href"])
             link=title.a["href"]
             crawl_text(link)#進入此文章
 
@@ -77,10 +62,10 @@ def crawl_text(url):
     main_container=root.find("div",id="main-content")
     #把文字抓出來
     all_text = main_container.text
-    #把內容透過"※"切割成兩個陣列，pre_text為第一個
-    #內文的底是※
-    pre_text = all_text.split('※')
-    pre_text = all_text.split('※')[0]
+    #把內容透過"--\n※"切割成兩個陣列，pre_text為第一個
+    #內文的底是--\n※
+    pre_text = all_text.split('--\n※')
+    pre_text = all_text.split('--\n※')[0]
     #把文字用'\n'切開
     texts=pre_text.split('\n')
     #拿掉第一行:標題
@@ -90,8 +75,18 @@ def crawl_text(url):
 
     #打開file(f)
     with open('gossip_crawl.json', 'a', encoding='utf-8') as f:#用utf-8解碼中文
-        #com_dict = collections.OrderedDict()#回應dict
-        com_dicts = collections.defaultdict()
+        #com_dicts存所有留言的dict
+        com_dicts = collections.OrderedDict()
+        """
+        dict是無序
+        取調用某個dict的key值時，須事先檢查這個key值是否存在
+        否則如果直接調用不存在的key值，會直接拋出KeyError
+        OrderedDict會根據放入元素的先後順序進行排序
+        collections.defaultdict(default_factory)對於我們調用一個不存在的key值
+        他會先建立一個default值給我們
+        default_factory: A function returning the default value for the dictionary defined.
+        """
+
         pushs=root.find_all("div",class_="push")#抓取推文
         n=1#推文數
         for push in pushs:
@@ -111,18 +106,12 @@ def crawl_text(url):
             str(n)#int to string
             #把推文資料存進com_dict
 
-            com_dict = collections.defaultdict()
-            """
-            addtwodimdict(com_dict,n,"user", user.string)
-            addtwodimdict(com_dict,n,"tag", tag)
-            addtwodimdict(com_dict,n,"com", com)
-            """
-            #com_dict = collections.defaultdict
+            #com_dict存單一留言的資料
+            com_dict = collections.OrderedDict()
             com_dict['tag']=(tag)
             com_dict['user']=(user.string)
             com_dict['com']=(com)
             com_dict['time']=(com_time.string)
-            #print(com_dict)
             com_dicts[n]=com_dict
             int(n)#string to int
             n=n+1
@@ -134,11 +123,13 @@ def crawl_text(url):
         dic['content']=content
         dic['comment']=com_dicts
         d=dict(dic)
-        #d=[{"author":author,"board":board,"title":title,"time":time,"content":content,"comment":com_dict}]
         json.dump(d,f,ensure_ascii=False,sort_keys=False, indent=4);
         """
-        sort_keys : 這個應該字面上很好理解了，是否排序Key。
-        indent : 若給非負整數，會幫你格式編排好看依照（填入的）數字等級。
+        json.dump 將python類型轉為json類型
+        ensure_ascii:含中文時需指定ensure_ascii=False，否則輸出中文的ascii(保證內容都為ascii)
+        separators = ( ',' , ':' ) 包含分割的字符串，去掉冗空格
+        sort_keys : 是否排序Key
+        indent : 若給非負整數，會幫你格式編排好看依照（填入的）數字等級
         """
         print("writing...")
 url="https://www.ptt.cc/bbs/Gossiping/index.html"
